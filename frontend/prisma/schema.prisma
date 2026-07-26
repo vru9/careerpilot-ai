@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  clerkId    String   @unique
+  email      String
+  name       String?
+  imageUrl   String?
+  createdAt  DateTime @default(now())
+
+  resumes    Resume[]
+  savedJobs  SavedJob[]
+}
+
+model Resume {
+  id              String   @id @default(cuid())
+  filename        String
+  resumeText      String   @db.Text
+
+  atsScore        Int
+  summary         String   @db.Text
+
+  strengths       String[]
+  weaknesses      String[]
+  skills          String[]
+  recommendations String[]
+  bestRoles       String[]
+  missingKeywords String[]
+
+  createdAt       DateTime @default(now())
+
+  userId          String
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  jobs            JobRecommendation[]
+}
+
+model JobRecommendation {
+  id                 String   @id @default(cuid())
+
+  title              String
+  company            String
+  location           String
+
+  source             String
+  postedDate         String?
+
+  salary             String?
+
+  description        String   @db.Text
+  applyUrl           String
+
+  matchScore         Int
+  whyMatch           String   @db.Text
+
+  matchedSkills      String[]
+  missingSkills      String[]
+  learningPriority   String[]
+
+  interviewReadiness String
+
+  resumeId           String
+  resume             Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model SavedJob {
+  id         String   @id @default(cuid())
+
+  title      String
+  company    String
+  location   String
+  applyUrl   String
+
+  matchScore Int
+
+  createdAt  DateTime @default(now())
+
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  --background: #030712;
+  --foreground: #f8fafc;
+}
+
+body {
+  background: radial-gradient(circle at top, #111827 0%, #030712 60%);
+  color: var(--foreground);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid pattern */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: -2;
+}
+
+/* Blue glow */
+body::after {
+  content: "";
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: rgba(37, 99, 235, 0.18);
+  filter: blur(140px);
+  top: -150px;
+  left: -150px;
+  border-radius: 50%;
+  z-index: -1;
+}
