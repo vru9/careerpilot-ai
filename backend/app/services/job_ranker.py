@@ -75,10 +75,9 @@ Format:
 
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",   # Use a model you have access to
+                model="gemini-3.6-flash",   # Use a model you have access to
                 contents=prompt,
                 config=types.GenerateContentConfig(
-                    temperature=0.2,
                     response_mime_type="application/json",
                 ),
             )
