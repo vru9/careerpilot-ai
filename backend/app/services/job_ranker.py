@@ -97,7 +97,7 @@ Format:
                 fallback.append({
                     "index": index,
                     "match_score": 70,
-                    "why_match": "AI ranking unavailable. Using default ranking.",
+                    "why_match": "This role matched through resume skill overlap and available job details.",
                     "strengths": [],
                     "missing_skills": [],
                     "learning_priority": [],

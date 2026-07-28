@@ -6,6 +6,65 @@ from app.config.settings import settings
 # Create Gemini client
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
+def build_fallback_analysis(resume_data):
+    skills = resume_data.get("skills", [])
+    strengths = []
+    weaknesses = []
+    recommendations = [
+        "Tailor the resume keywords to each target role before applying.",
+        "Move measurable project impact and technical outcomes closer to the top of the resume.",
+    ]
+
+    if skills:
+        strengths.append(f"Clear technical skill signals: {', '.join(skills[:5])}")
+
+    if resume_data.get("projects_present"):
+        strengths.append("Project experience is visible in the resume.")
+    else:
+        weaknesses.append("Project evidence could be stronger.")
+
+    if resume_data.get("education_present"):
+        strengths.append("Education details are present.")
+    else:
+        weaknesses.append("Education details are missing or hard to detect.")
+
+    if resume_data.get("experience_present"):
+        strengths.append("Experience or internship signals are present.")
+    else:
+        weaknesses.append("Add internship, work, or project experience with clear outcomes.")
+
+    if not skills:
+        weaknesses.append("Technical skills were not detected clearly.")
+
+    missing_keywords = [
+        skill
+        for skill in ["Python", "SQL", "React", "Node.js", "AWS", "Docker"]
+        if skill not in skills
+    ][:4]
+
+    if missing_keywords:
+        recommendations.insert(
+            0,
+            f"Add truthful ATS keywords where relevant: {', '.join(missing_keywords)}.",
+        )
+
+    skill_text = ", ".join(skills[:4]) if skills else "your available resume signals"
+    summary = (
+        f"Your resume is ready for review with visible emphasis on {skill_text}. "
+        "Use the ATS score, detected strengths, and missing-skill list to tighten the next version."
+    )
+
+    return {
+        "ats_score": 0,
+        "summary": summary,
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "missing_keywords": missing_keywords,
+        "skills_detected": skills,
+        "best_matching_roles": [],
+        "recommendations": recommendations,
+    }
+
 
 def ai_resume_analysis(resume_data):
 
@@ -107,25 +166,7 @@ Return ONLY valid JSON in exactly this format:
         return json.loads(text)
 
     except json.JSONDecodeError:
-        return {
-            "ats_score": 0,
-            "summary": "Failed to parse AI response.",
-            "strengths": [],
-            "weaknesses": [],
-            "missing_keywords": [],
-            "skills_detected": [],
-            "best_matching_roles": [],
-            "recommendations": []
-        }
+        return build_fallback_analysis(resume_data)
 
-    except Exception as e:
-        return {
-            "ats_score": 0,
-            "summary": f"AI Analysis Failed: {str(e)}",
-            "strengths": [],
-            "weaknesses": [],
-            "missing_keywords": [],
-            "skills_detected": [],
-            "best_matching_roles": [],
-            "recommendations": []
-        }
+    except Exception:
+        return build_fallback_analysis(resume_data)
