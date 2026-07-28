@@ -5,11 +5,22 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Briefcase, FileText, Wrench } from "lucide-react";
 
+function decodeHtml(html: string) {
+  if (typeof window === "undefined") return html;
+
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = html;
+  return textarea.value;
+}
+
+
+
 export default function Dashboard() {
 
   const [data, setData] = useState<any>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("match");
+  const [expandedJobs, setExpandedJobs] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const stored = localStorage.getItem("careerpilot_result");
@@ -518,22 +529,35 @@ export default function Dashboard() {
 {/* About the Role */}
 
 {job.description && (
+  <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
 
-<div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
+    <h4 className="mb-3 font-semibold text-cyan-300">
+      📝 About this Role
+    </h4>
 
-  <h4 className="mb-3 font-semibold text-cyan-300">
-    📝 About this Role
-  </h4>
+    <div
+      className={`text-gray-300 leading-relaxed ${
+        expandedJobs[index] ? "" : "line-clamp-4"
+      }`}
+      dangerouslySetInnerHTML={{
+        __html: decodeHtml(job.description),
+      }}
+    />
 
-  <div
-    className="line-clamp-4 text-gray-300"
-    dangerouslySetInnerHTML={{
-      __html: job.description,
-    }}
-  />
+    <button
+      type="button"
+      onClick={() =>
+        setExpandedJobs((prev) => ({
+          ...prev,
+          [index]: !prev[index],
+        }))
+      }
+      className="mt-4 font-medium text-cyan-300 hover:text-cyan-200"
+    >
+      {expandedJobs[index] ? "Show less ↑" : "Read more ↓"}
+    </button>
 
-</div>
-
+  </div>
 )}
 
       {/* Skills */}
@@ -593,28 +617,22 @@ export default function Dashboard() {
 
 {/* Learning Priority */}
 
-<div className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-5">
+{job.learning_priority?.length > 0 && (
+  <div className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-5">
+    <h4 className="mb-4 font-semibold text-yellow-300">
+      📚 Learning Priority
+    </h4>
 
-  <h4 className="mb-4 font-semibold text-yellow-300">
-    📚 Learning Priority
-  </h4>
-
-  <div className="flex flex-wrap gap-3">
-
-    {job.learning_priority?.map((item: string) => (
-
-      <span
-        key={item}
-        className="rounded-full bg-yellow-500/20 px-4 py-2 text-sm text-yellow-200"
-      >
-        {item}
-      </span>
-
-    ))}
-
+    <ul className="space-y-2 text-yellow-100">
+      {job.learning_priority.map((item: string, index: number) => (
+        <li key={index} className="flex items-start gap-2">
+          <span>•</span>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
   </div>
-
-</div>
+)}
 
 
       {/* Footer */}
